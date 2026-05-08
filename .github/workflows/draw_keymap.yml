@@ -13,8 +13,8 @@ jobs:
     uses: caksoylar/keymap-drawer/.github/workflows/draw-zmk.yml@main
     permissions:
       contents: write
-with:
-  keymap_patterns: 'config/*.keymap'
-  config_path: 'config/keymap_drawer.config.yaml'
-  output_folder: 'keymap-drawer'
-  amend_commit: true
+    with:
+      keymap_patterns: 'config/*.keymap'
+      config_path: 'config/keymap_drawer.config.yaml'
+      output_folder: 'keymap-drawer'
+      amend_commit: true
