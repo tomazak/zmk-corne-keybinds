@@ -50,7 +50,7 @@ ZMK_TRI_STATE(swapper,
 ZMK_CONDITIONAL_LAYER(adjust, 1 2, 3)
 
 // ─── Example combo: J + K → Esc (base layer only) ────────────────
-ZMK_COMBO(combo_esc, &kp ESC, RM1 RM2, 0)
+// ZMK_COMBO(combo_esc, &kp ESC, RM1 RM2, 0)
 
 // ─── Layers ──────────────────────────────────────────────────────
 
