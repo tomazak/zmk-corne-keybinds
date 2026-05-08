@@ -1,20 +1,20 @@
-name: Draw ZMK keymap
+# .github/workflows/draw-keymap.yml
+name: Draw ZMK keymaps
+
 on:
+  workflow_dispatch:        # can be triggered manually
   push:
     paths:
       - 'config/*.keymap'
-  workflow_dispatch:
+      - '.github/workflows/draw-keymap.yml'
 
 jobs:
   draw:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: ${{ github.head_ref }}
-
-      - uses: caksoylar/keymap-drawer@main
-        with:
-          keymap_path: config/corne.keymap
-          output_folder: keymap-drawer
-          commit_message: "keymap-drawer: update svg [skip ci]"
+    uses: caksoylar/keymap-drawer/.github/workflows/draw-zmk.yml@main
+    permissions:
+      contents: write
+with:
+  keymap_patterns: 'config/*.keymap'
+  config_path: 'config/keymap_drawer.config.yaml'
+  output_folder: 'keymap-drawer'
+  amend_commit: true
