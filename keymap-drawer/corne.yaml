@@ -23,7 +23,7 @@ layers:
   - {t: J, h: RCTRL}
   - {t: K, h: RSHFT}
   - {t: L, h: LALT}
-  - {t: ;, h: LGUI}
+  - {t: ':', h: LGUI, s: ;}
   - ''''
   - LSHFT
   - Z
@@ -37,10 +37,10 @@ layers:
   - .
   - /
   - ESC
-  - LGUI
+  - '&magic'
   - lower
-  - SPACE
   - RET
+  - SPACE
   - raise
   - DEL
   lower:
@@ -57,33 +57,33 @@ layers:
   - '0'
   - BSPC
   - LCTRL
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
+  - LGUI
+  - LALT
+  - LSHFT
+  - LCTRL
+  - '&swapper'
+  - LEFT
+  - DOWN
   - UP
+  - RIGHT
+  - PG UP
   - {t: ▽, type: trans}
   - LSHFT
   - {t: ▽, type: trans}
   - {t: ▽, type: trans}
   - {t: ▽, type: trans}
   - {t: ▽, type: trans}
+  - Sft+TAB
+  - HOME
+  - END
   - {t: ▽, type: trans}
   - {t: ▽, type: trans}
+  - PG DN
   - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - LEFT
-  - DOWN
-  - RIGHT
   - LGUI
   - {type: held}
-  - SPACE
   - RET
+  - SPACE
   - {t: ▽, type: trans}
   - DEL
   raise:
@@ -100,33 +100,33 @@ layers:
   - )
   - BSPC
   - LCTRL
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
+  - '&m_home'
+  - '&m_updir'
+  - '&m_and'
+  - '&m_subst'
+  - '&m_arrow'
   - '-'
   - '='
   - '['
   - ']'
-  - '#'
+  - NUBS
   - '`'
   - LSHFT
   - _
   - +
   - '{'
   - '}'
-  - '|'
-  - '~'
+  - Sft+NUBS
+  - Sft+#
   - <
   - '>'
   - '?'
-  - '|'
-  - '~'
+  - Sft+2
+  - Sft+3
   - LGUI
   - {t: ▽, type: trans}
-  - SPACE
   - RET
+  - SPACE
   - {type: held}
   - DEL
   adjust:
@@ -172,3 +172,34 @@ layers:
   - {t: ▽, type: trans}
   - {type: held}
   - {t: ▽, type: trans}
+combos:
+- p: [19, 20]
+  k: ESC
+  l: [base]
+- p: [3, 4]
+  k: (
+  l: [base]
+- p: [7, 8]
+  k: )
+  l: [base]
+- p: [2, 3]
+  k: '['
+  l: [base]
+- p: [8, 9]
+  k: ']'
+  l: [base]
+- p: [26, 27]
+  k: '{'
+  l: [base]
+- p: [32, 33]
+  k: '}'
+  l: [base]
+- p: [28, 31]
+  k: '&caps_word'
+  l: [base]
+- p: [27, 32]
+  k: '&num_word 1'
+  l: [base]
+- p: [29, 30]
+  k: '&leader'
+  l: [base]

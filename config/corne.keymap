@@ -1,20 +1,17 @@
 /*
- * Corne UK ISO — starter keymap
- * Layers: 0 Base, 1 Lower, 2 Raise, 3 Adjust (tri-layer)
+ * Corne UK ISO — keymap tuned for coding / Linux CLI
+ * (symbols assume the OS keyboard layout is set to UK)
+ * Layers: 0 Base, 1 Lower (numbers + nav), 2 Raise (symbols + shell macros), 3 Adjust (tri-layer)
  */
 
 #include <behaviors.dtsi>
+#include <behaviors/num_word.dtsi>   // from urob/zmk-auto-layer
 #include <dt-bindings/zmk/keys.h>
 #include <dt-bindings/zmk/bt.h>
 #include <dt-bindings/zmk/outputs.h>
 
 #include "zmk-helpers/helper.h"
-#include "zmk-helpers/key-labels/corne.h"
-
-// ─── Position groups for HRMs ────────────────────────────────────
-#define KEYS_L LT0 LT1 LT2 LT3 LT4 LT5  LM0 LM1 LM2 LM3 LM4 LM5  LB0 LB1 LB2 LB3 LB4 LB5
-#define KEYS_R RT0 RT1 RT2 RT3 RT4 RT5  RM0 RM1 RM2 RM3 RM4 RM5  RB0 RB1 RB2 RB3 RB4 RB5
-#define THUMBS LH2 LH1 LH0 RH0 RH1 RH2
+#include "zmk-helpers/key-labels/42.h"   // Corne 6-col; also defines KEYS_L / KEYS_R / THUMBS
 
 // ─── Home row mods (GACS — Gui/Alt/Ctrl/Shift, index = Ctrl) ─────
 ZMK_HOLD_TAP(hml,
@@ -37,60 +34,154 @@ ZMK_HOLD_TAP(hmr,
     hold-trigger-on-release;
 )
 
+// ─── Colon first: tap = :  shift+tap = ; ──────────────────────────
+ZMK_MOD_MORPH(colon_semi,
+    bindings = <&kp COLON>, <&kp SEMI>;
+    mods = <(MOD_LSFT|MOD_RSFT)>;
+)
+
+// Same as hmr, but the tap is the colon_semi mod-morph (use as &hmr_colon LGUI 0)
+ZMK_HOLD_TAP(hmr_colon,
+    flavor = "balanced";
+    tapping-term-ms = <280>;
+    quick-tap-ms = <175>;
+    require-prior-idle-ms = <150>;
+    bindings = <&kp>, <&colon_semi>;
+    hold-trigger-key-positions = <KEYS_L THUMBS>;
+    hold-trigger-on-release;
+)
+
 // ─── Tri-state: smart Alt-Tab ────────────────────────────────────
-// Tap once → Alt+Tab fires and Alt stays held. Keep tapping the
-// same key to step through windows. Press anything else, or wait,
-// and Alt releases. (Optional — remove if you'd rather not.)
+// Hold Lower, tap G → Alt+Tab with Alt held. Keep tapping G to step
+// forward, B to step back. Let go of Lower (or press any other key)
+// and Alt releases, landing on the selected window.
 ZMK_TRI_STATE(swapper,
     bindings = <&kt LALT>, <&kp TAB>, <&kt LALT>;
-    ignored-key-positions = <RT4>;   // RT4 = the key bound to &kp LS(TAB) for back-stepping
+    ignored-key-positions = <LB0>;   // LB0 (B on Lower) = &kp LS(TAB) for back-stepping
 )
+
+// ─── Magic shift (adaptive key, left outer thumb) ────────────────
+// Tap right after a letter/number/symbol → repeat it (ll, ==, //, ..).
+// Tap at the start of a word → one-shot Shift (capitalise next key).
+ZMK_ADAPTIVE_KEY(magic,
+    bindings = <&sk LSHFT>;
+    repeat {
+        trigger-keys = <A B C D E F G H I J K L M N O P Q R S T U V W X Y Z
+                        N0 N1 N2 N3 N4 N5 N6 N7 N8 N9
+                        DOT COMMA FSLH MINUS EQUAL>;
+        bindings = <&key_repeat>;
+        max-prior-idle-ms = <350>;
+        strict-modifiers;
+    };
+)
+
+// ─── Shell / coding macros (Raise layer, left home row) ──────────
+ZMK_MACRO(m_home,  bindings = <&kp LS(NUHS) &kp FSLH>;)                     // ~/
+ZMK_MACRO(m_updir, bindings = <&kp DOT &kp DOT &kp FSLH>;)                  // ../
+ZMK_MACRO(m_and,   bindings = <&kp AMPS &kp AMPS>;)                         // &&
+ZMK_MACRO(m_subst, bindings = <&kp DLLR &kp LPAR &kp RPAR &kp LEFT>;)       // $(|)
+ZMK_MACRO(m_arrow, bindings = <&kp MINUS &kp GT>;)                          // ->
+
+// ─── Leader macros (typed out by leader sequences below) ─────────
+ZMK_MACRO(m_shebang, bindings = <&kp NUHS &kp EXCL &kp FSLH &kp U &kp S &kp R &kp FSLH
+                                 &kp B &kp I &kp N &kp FSLH &kp E &kp N &kp V &kp SPACE
+                                 &kp B &kp A &kp S &kp H>;)                 // #!/usr/bin/env bash
+ZMK_MACRO(m_gst, bindings = <&kp G &kp I &kp T &kp SPACE
+                             &kp S &kp T &kp A &kp T &kp U &kp S>;)         // git status
+ZMK_MACRO(m_gcm, bindings = <&kp G &kp I &kp T &kp SPACE
+                             &kp C &kp O &kp M &kp M &kp I &kp T &kp SPACE
+                             &kp MINUS &kp M &kp SPACE
+                             &kp LS(N2) &kp LS(N2) &kp LEFT>;)              // git commit -m "|"
+ZMK_MACRO(m_gps, bindings = <&kp G &kp I &kp T &kp SPACE
+                             &kp P &kp U &kp S &kp H>;)                     // git push
+ZMK_MACRO(m_glg, bindings = <&kp G &kp I &kp T &kp SPACE
+                             &kp L &kp O &kp G &kp SPACE
+                             &kp MINUS &kp MINUS &kp O &kp N &kp E &kp L &kp I &kp N &kp E>;)  // git log --oneline
+
+// ─── Leader key (combo B+N, then type a sequence) ────────────────
+/ {
+    behaviors {
+        leader: leader {
+            compatible = "zmk,behavior-leader-key";
+            #binding-cells = <0>;
+            // Typing helpers
+            shebang { sequence = <S H>;         bindings = <&m_shebang>; };
+            gst     { sequence = <G S>;         bindings = <&m_gst>; };
+            gcm     { sequence = <G C>;         bindings = <&m_gcm>; };
+            gps     { sequence = <G P>;         bindings = <&m_gps>; };
+            glg     { sequence = <G L>;         bindings = <&m_glg>; };
+            // System (acts on the left half — use Adjust for the right)
+            usb     { sequence = <U S B>;       bindings = <&out OUT_USB>; };
+            ble     { sequence = <B L E>;       bindings = <&out OUT_BLE>; };
+            bt0     { sequence = <B N0>;        bindings = <&bt BT_SEL 0>; };
+            bt1     { sequence = <B N1>;        bindings = <&bt BT_SEL 1>; };
+            bt2     { sequence = <B N2>;        bindings = <&bt BT_SEL 2>; };
+            bt3     { sequence = <B N3>;        bindings = <&bt BT_SEL 3>; };
+            bt4     { sequence = <B N4>;        bindings = <&bt BT_SEL 4>; };
+            btclr   { sequence = <C L E A R>;   bindings = <&bt BT_CLR>; };
+            boot    { sequence = <B O O T>;     bindings = <&bootloader>; };
+            reset   { sequence = <R E S E T>;   bindings = <&sys_reset>; };
+        };
+    };
+};
 
 // ─── Tri-layer: Lower + Raise → Adjust ───────────────────────────
 ZMK_CONDITIONAL_LAYER(adjust, 1 2, 3)
 
-// ─── Example combo: J + K → Esc (base layer only) ────────────────
-// ZMK_COMBO(combo_esc, &kp ESC, RM1 RM2, 0)
+// ─── Combos (base layer) ─────────────────────────────────────────
+// Args: name, binding, positions, layers, timeout-ms, require-prior-idle-ms.
+// The 150 ms idle on the bracket combos stops them firing mid-word
+// on common rolls like "er", "we", "io".
+ZMK_COMBO(esc,      &kp ESC,      RM1 RM2, 0, 40)        // J + K
+ZMK_COMBO(lpar,     &kp LPAR,     LT2 LT1, 0, 30, 150)   // E + R → (
+ZMK_COMBO(rpar,     &kp RPAR,     RT1 RT2, 0, 30, 150)   // U + I → )
+ZMK_COMBO(lbkt,     &kp LBKT,     LT3 LT2, 0, 30, 150)   // W + E → [
+ZMK_COMBO(rbkt,     &kp RBKT,     RT2 RT3, 0, 30, 150)   // I + O → ]
+ZMK_COMBO(lbrc,     &kp LBRC,     LB3 LB2, 0, 30, 150)   // X + C → {
+ZMK_COMBO(rbrc,     &kp RBRC,     RB2 RB3, 0, 30, 150)   // , + . → }
+ZMK_COMBO(capsword, &caps_word,   LB1 RB1, 0, 30)        // V + M → CAPS_WORD
+ZMK_COMBO(numword,  &num_word 1,  LB2 RB2, 0, 30)        // C + , → NUM_WORD (Lower until a non-number)
+ZMK_COMBO(lead,     &leader,      LB0 RB0, 0, 30)        // B + N → LEADER
 
 // ─── Layers ──────────────────────────────────────────────────────
 
 ZMK_LAYER(base,
 //╭───────────┬─────────────┬─────────────┬──────────────┬──────────────┬───────────╮ ╭───────────┬──────────────┬──────────────┬─────────────┬─────────────────┬──────────╮
 //│   TAB     │      Q      │      W      │      E       │      R       │     T     │ │     Y     │      U       │      I       │      O      │       P         │   BSPC   │
-//│  LCTRL    │   A / GUI   │   S / ALT   │   D / SHFT   │   F / CTRL   │     G     │ │     H     │   J / CTRL   │   K / SHFT   │   L / ALT   │    ; / GUI      │    '     │
+//│  LCTRL    │   A / GUI   │   S / ALT   │   D / SHFT   │   F / CTRL   │     G     │ │     H     │   J / CTRL   │   K / SHFT   │   L / ALT   │  : (⇧;) / GUI   │    '     │
 //│  LSHFT    │      Z      │      X      │      C       │      V       │     B     │ │     N     │      M       │      ,       │      .      │       /         │   ESC    │
 //╰───────────┴─────────────┴─────────────┼──────────────┼──────────────┼───────────┤ ├───────────┼──────────────┼──────────────┼─────────────┴─────────────────┴──────────╯
-//                                        │     LGUI     │   LWR (mo1)  │    SPC    │ │    ENT    │  RSE (mo2)   │     DEL      │
+//                                        │    MAGIC     │   LWR (mo1)  │    ENT    │ │    SPC    │  RSE (mo2)   │     DEL      │
    &kp TAB    &kp Q         &kp W         &kp E          &kp R          &kp T         &kp Y       &kp U          &kp I          &kp O         &kp P             &kp BSPC
-   &kp LCTRL  &hml LGUI A   &hml LALT S   &hml LSHFT D   &hml LCTRL F   &kp G         &kp H       &hmr RCTRL J   &hmr RSHFT K   &hmr LALT L   &hmr LGUI SEMI    &kp SQT
+   &kp LCTRL  &hml LGUI A   &hml LALT S   &hml LSHFT D   &hml LCTRL F   &kp G         &kp H       &hmr RCTRL J   &hmr RSHFT K   &hmr LALT L   &hmr_colon LGUI 0 &kp SQT
    &kp LSHFT  &kp Z         &kp X         &kp C          &kp V          &kp B         &kp N       &kp M          &kp COMMA      &kp DOT       &kp FSLH          &kp ESC
-                                          &kp LGUI       &mo 1          &kp SPACE     &kp RET     &mo 2          &kp DEL
+                                          &magic         &mo 1          &kp RET       &kp SPACE   &mo 2          &kp DEL
 )
 
 ZMK_LAYER(lower,
 //╭───────────┬─────────────┬─────────────┬──────────────┬──────────────┬─────────────╮ ╭───────────┬──────────────┬──────────────┬─────────────┬───────────┬──────────╮
 //│   TAB     │      1      │      2      │      3       │      4       │      5      │ │     6     │      7       │      8       │      9      │     0     │   BSPC   │
-//│  LCTRL    │             │             │              │              │             │ │           │              │              │             │     ↑     │          │
-//│  LSHFT    │             │             │              │              │             │ │           │              │              │      ←      │     ↓     │    →     │
+//│  LCTRL    │     GUI     │     ALT     │    SHIFT     │     CTRL     │   SWAPPER   │ │     ←     │      ↓       │      ↑       │      →      │   PG UP   │          │
+//│  LSHFT    │             │             │              │              │    ⇧TAB     │ │   HOME    │     END      │              │             │   PG DN   │          │
 //╰───────────┴─────────────┴─────────────┼──────────────┼──────────────┼─────────────┤ ├───────────┼──────────────┼──────────────┼─────────────┴───────────┴──────────╯
-//                                        │     LGUI     │              │     SPC     │ │    ENT    │              │     DEL      │
+//                                        │     LGUI     │              │     ENT     │ │    SPC    │              │     DEL      │
    &kp TAB    &kp N1        &kp N2        &kp N3         &kp N4         &kp N5          &kp N6      &kp N7         &kp N8         &kp N9        &kp N0      &kp BSPC
-   &kp LCTRL  &trans        &trans        &trans         &trans         &trans          &trans      &trans         &trans         &trans        &kp UP      &trans
-   &kp LSHFT  &trans        &trans        &trans         &trans         &trans          &trans      &trans         &trans         &&kp LEFT     &kp DOWN    &kp RIGHT
-                                          &kp LGUI       &trans         &kp SPACE       &kp RET     &trans         &kp DEL
+   &kp LCTRL  &kp LGUI      &kp LALT      &kp LSHFT      &kp LCTRL      &swapper        &kp LEFT    &kp DOWN       &kp UP         &kp RIGHT     &kp PG_UP   &trans
+   &kp LSHFT  &trans        &trans        &trans         &trans         &kp LS(TAB)     &kp HOME    &kp END        &trans         &trans        &kp PG_DN   &trans
+                                          &kp LGUI       &trans         &kp RET         &kp SPACE   &trans         &kp DEL
 )
 
 ZMK_LAYER(raise,
 //╭───────────┬─────────────┬─────────────┬──────────────┬──────────────┬─────────────╮ ╭───────────┬──────────────┬──────────────┬─────────────┬───────────┬──────────╮
 //│   TAB     │      !      │      @      │      #       │      $       │      %      │ │     ^     │      &       │      *       │      (      │     )     │   BSPC   │
-//│  LCTRL    │             │             │              │              │             │ │     -     │      =       │      [       │      ]      │     #     │     `    │
-//│  LSHFT    │      _      │      +      │      {       │      }       │      |      │ │     ~     │      <       │      >       │      ?      │     |     │     ~    │
+//│  LCTRL    │     ~/      │     ../     │      &&      │     $()      │     ->      │ │     -     │      =       │      [       │      ]      │     \     │     `    │
+//│  LSHFT    │      _      │      +      │      {       │      }       │      |      │ │     ~     │      <       │      >       │      ?      │     "     │     £    │
 //╰───────────┴─────────────┴─────────────┼──────────────┼──────────────┼─────────────┤ ├───────────┼──────────────┼──────────────┼─────────────┴───────────┴──────────╯
-//                                        │     LGUI     │              │     SPC     │ │    ENT    │              │     DEL      │
-   &kp TAB    &kp EXCL      &kp DQT       &kp HASH       &kp DLLR       &kp PRCNT       &kp CARET   &kp AMPS       &kp ASTRK      &kp LPAR      &kp RPAR    &kp BSPC
-   &kp LCTRL  &trans        &trans        &trans         &trans         &trans          &kp MINUS   &kp EQUAL      &kp LBKT       &kp RBKT      &kp NUHS    &kp GRAVE
-   &kp LSHFT  &kp UNDER     &kp PLUS      &kp LBRC       &kp RBRC       &kp PIPE        &kp TILDE   &kp LT         &kp GT         &kp QMARK     &kp PIPE    &kp TILDE
-                                          &kp LGUI       &trans         &kp SPACE       &kp RET     &trans         &kp DEL
+//                                        │     LGUI     │              │     ENT     │ │    SPC    │              │     DEL      │
+   &kp TAB    &kp EXCL      &kp DQT       &kp NUHS       &kp DLLR       &kp PRCNT       &kp CARET   &kp AMPS       &kp ASTRK      &kp LPAR      &kp RPAR    &kp BSPC
+   &kp LCTRL  &m_home       &m_updir      &m_and         &m_subst       &m_arrow        &kp MINUS   &kp EQUAL      &kp LBKT       &kp RBKT      &kp NUBS    &kp GRAVE
+   &kp LSHFT  &kp UNDER     &kp PLUS      &kp LBRC       &kp RBRC       &kp LS(NUBS)    &kp LS(NUHS) &kp LT        &kp GT         &kp QMARK     &kp LS(N2)  &kp LS(N3)
+                                          &kp LGUI       &trans         &kp RET         &kp SPACE   &trans         &kp DEL
 )
 
 ZMK_LAYER(adjust,

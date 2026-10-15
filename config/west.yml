@@ -10,15 +10,26 @@ manifest:
       url-base: https://github.com/dhruvinsh
     - name: urob
       url-base: https://github.com/urob
+    - name: m165437
+      url-base: https://github.com/M165437
   projects:
     - name: zmk
       remote: zmkfirmware
       import: app/west.yml
+    # Module revisions are pinned to match ZMK v0.3 (the default above)
     - name: zmk-helpers
       remote: urob
-      revision: main
+    - name: zmk-auto-layer
+      remote: urob
+    - name: zmk-leader-key
+      remote: urob
+    - name: zmk-adaptive-key
+      remote: urob
     - name: zmk-tri-state
       remote: dhruvinsh
-      revision: main
+      revision: main    # no tagged releases
+    - name: nice-view-gem
+      remote: m165437
+      revision: v0.3.0
   self:
     path: config
